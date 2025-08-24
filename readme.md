@@ -72,33 +72,6 @@ Open **http://127.0.0.1:5000** in your browser.
 
 ---
 
-## 🌐 Deployment Guide
-
-### **Heroku**
-```bash
-# Install Heroku CLI
-curl https://cli-assets.heroku.com/install.sh | sh
-
-# Login to Heroku
-heroku login
-
-# Create Heroku App
-heroku create documorph-app
-
-# Deploy
-git push heroku main
-
-# Open App
-heroku open
-```
-
-### **Gunicorn (Production WSGI Server)**
-```bash
-gunicorn -w 4 app:app
-```
-
----
-
 ## 📦 Tech Stack
 
 - **Backend**: Flask (Python)
