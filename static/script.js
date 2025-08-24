@@ -1,4 +1,19 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const burger = document.querySelector('.burger-menu');
+  const popup = document.querySelector('.burger-popup');
+  const closeBtn = document.querySelector('.close-btn');
+
+  if (burger && popup && closeBtn) {
+    burger.addEventListener('click', () => {
+      popup.style.display = 'block';
+    });
+
+    closeBtn.addEventListener('click', () => {
+      popup.style.display = 'none';
+    });
+  }
+
+
   const form = document.getElementById("uploadForm");
   if (!form) return;
 
@@ -149,3 +164,4 @@ function updateFileName() {
 }
 
 document.getElementById("fileInput").addEventListener("change", updateFileName);
+

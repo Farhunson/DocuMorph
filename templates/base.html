@@ -19,11 +19,114 @@
 
   <nav class="nav">
     <div class="nav-left">
-      <img src="{{ url_for('static', filename='logo.svg') }}" alt="logo" class="logo">
-      <a href="{{ url_for('home') }}">DocuMorph</a>
+        <!-- <img src="{{ url_for('static', filename='logo.svg') }}" alt="logo" class="logo"> -->
+        <a href="{{ url_for('home') }}" class="glitch-logo" data-text="DOCUMORPH">DOCUMORPH</a>
     </div>
-    <div class="nav-right">
-      <a href="{{ url_for('home') }}">All Tools</a>
+    <div class="burger-menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="burger-popup" >
+        <button class="close-btn">&times;</button>
+        <div class="burger-content">
+            <!-- Clone of mega-menu content -->
+            <div class="mega-menu">
+                <div class="menu-col">
+                    <h4>Organize PDF</h4>
+                    <a href="{{ url_for('merge') }}">Merge PDF</a>
+                    <a href="{{ url_for('split') }}">Split PDF</a>
+                    <a href="{{ url_for('reorder_pages_route') }}">Rearrange page order</a>
+                    <a href="{{ url_for('rotate') }}">Rotate all pages</a>
+                </div>
+                <div class="menu-col">
+                    <h4>Convert PDF</h4>
+                    <a href="{{ url_for('pdf_to_word') }}">PDF to Word</a>
+                    <a href="{{ url_for('pdf_to_excel_route') }}">PDF to Excel</a>
+                    <a href="{{ url_for('pdf_to_html_route') }}">PDF to HTML</a>
+                    <a href="{{ url_for('pdf_to_images_route') }}">Compress PDF</a>
+                    <a href="{{ url_for('images_to_pdf_route') }}">Images to PDF</a>
+                    <a href="{{ url_for('office_to_pdf_route') }}">Office to PDF</a>
+                    <a href="{{ url_for('extract_text_route') }}">Extract Text</a>
+                    <a href="{{ url_for('extract_images_route') }}">Extract Images</a>
+                    <a href="{{ url_for('pdf_ocr_route') }}">OCR PDF</a>
+                </div>
+                <div class="menu-col">
+                    <h4>Optimize PDF</h4>
+                    <a href="{{ url_for('compress') }}">Compress PDF</a>
+                    <a href="{{ url_for('watermark') }}">Watermark PDF</a>
+                </div>
+                <div class="menu-col">
+                    <h4>PDF Security</h4>
+                    <a href="{{ url_for('protect') }}">Protect PDF</a>
+                    <a href="{{ url_for('unlock') }}">Unlock PDF</a>
+                </div>
+                <div class="menu-col">
+                    <h4>Edit PDF</h4>
+                    <a href="{{ url_for('sign') }}">Sign PDF</a>
+                </div>
+            <!-- put the same columns/links as your desktop mega-menu -->
+            </div>
+        </div>
+    </div>
+    <div class="nav-right cyber-nav">
+        {% set current_path = request.path %}
+
+        <a href="{{ url_for('merge') }}" class="{% if current_path == url_for('merge') %}active{% endif %}">Merge PDF</a>
+        <a href="{{ url_for('split') }}" class="{% if current_path == url_for('split') %}active{% endif %}">Split PDF</a>
+        <a href="{{ url_for('compress') }}" class="{% if current_path == url_for('compress') %}active{% endif %}">Compress PDF</a>
+
+
+        <!-- Dropdown: Convert PDF -->
+        <div class="dropdown">
+        <a href="#" class="drop-btn">Convert PDF ▾</a>
+            <div class="dropdown-content">
+                <a href="{{ url_for('pdf_to_word') }}">PDF to Word</a>
+                <a href="{{ url_for('pdf_to_excel_route') }}">PDF to Excel</a>
+                <a href="{{ url_for('pdf_to_images_route') }}">PDF to Images</a>
+                <a href="{{ url_for('pdf_to_html_route') }}">PDF to HTML</a>
+            </div>
+        </div>
+
+        <!-- Mega Dropdown: All Tools -->
+        <div class="dropdown mega">
+            <a href="#" class="drop-btn">All PDF Tools ▾</a>
+            <div class="mega-menu">
+                <div class="menu-col">
+                    <h4>Organize PDF</h4>
+                    <a href="{{ url_for('merge') }}">Merge PDF</a>
+                    <a href="{{ url_for('split') }}">Split PDF</a>
+                    <a href="{{ url_for('reorder_pages_route') }}">Rearrange page order</a>
+                    <a href="{{ url_for('rotate') }}">Rotate all pages</a>
+                </div>
+                <div class="menu-col">
+                    <h4>Convert PDF</h4>
+                    <a href="{{ url_for('pdf_to_word') }}">PDF to Word</a>
+                    <a href="{{ url_for('pdf_to_excel_route') }}">PDF to Excel</a>
+                    <a href="{{ url_for('pdf_to_html_route') }}">PDF to HTML</a>
+                    <a href="{{ url_for('pdf_to_images_route') }}">Compress PDF</a>
+                    <a href="{{ url_for('images_to_pdf_route') }}">Images to PDF</a>
+                    <a href="{{ url_for('office_to_pdf_route') }}">Office to PDF</a>
+                    <a href="{{ url_for('extract_text_route') }}">Extract Text</a>
+                    <a href="{{ url_for('extract_images_route') }}">Extract Images</a>
+                    <a href="{{ url_for('pdf_ocr_route') }}">OCR PDF</a>
+                </div>
+                <div class="menu-col">
+                    <h4>Optimize PDF</h4>
+                    <a href="{{ url_for('compress') }}">Compress PDF</a>
+                    <a href="{{ url_for('watermark') }}">Watermark PDF</a>
+                </div>
+                <div class="menu-col">
+                    <h4>PDF Security</h4>
+                    <a href="{{ url_for('protect') }}">Protect PDF</a>
+                    <a href="{{ url_for('unlock') }}">Unlock PDF</a>
+                </div>
+                <div class="menu-col">
+                    <h4>Edit PDF</h4>
+                    <a href="{{ url_for('sign') }}">Sign PDF</a>
+                </div>
+            </div>
+        </div>
     </div>
   </nav>
   <main class="container">

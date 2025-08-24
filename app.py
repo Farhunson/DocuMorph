@@ -283,8 +283,26 @@ def watermark():
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Watermark PDF", accept=".pdf", extra_controls="""
-    <label class='lbl'>Watermark PDF</label>
-    <input type="file" name="watermark" accept=".pdf" required class="input">
+    <label class="lbl upload-label">Watermark PDF</label>
+
+    <div class="file-upload-container">
+    <input type="file" name="watermark" id="watermarkInput" accept=".pdf" hidden required>
+
+    <!-- Cyberpunk Choose File Button -->
+    <label for="watermarkInput" class="cyberpunk-btn" data-text="Choose File">
+        <span class="btn-text">Choose File</span>
+    </label>
+
+    <!-- Selected Filename (Centered Below Button) -->
+    <span id="watermark-file-name" class="file-name">No file selected</span>
+    </div>
+
+    <script>
+    document.getElementById('watermarkInput').addEventListener('change', function() {
+    const fileName = this.files.length > 0 ? this.files[0].name : 'No file selected';
+    document.getElementById('watermark-file-name').textContent = fileName;
+    });
+    </script>
     """)
 
 # -------- Rotate --------
@@ -407,9 +425,21 @@ def sign():
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Sign PDF", accept=".pdf", extra_controls="""
-    <label class='lbl'>Signature image (PNG/JPG)</label>
-    <input type="file" name="image" accept=".png,.jpg,.jpeg" required class="input">
-    <label class='lbl'>Size (page width fraction)</label>
+    <label class="lbl upload-label">Signature image (PNG/JPG)</label>
+
+    <div class="file-upload-container">
+        <input type="file" name="image" id="signatureInput" accept=".png,.jpg,.jpeg" hidden required>
+        
+        <!-- Cyberpunk Choose File Button -->
+        <label for="signatureInput" class="cyberpunk-btn" data-text="Choose Image">
+        <span class="btn-text">Choose Image</span>
+        </label>
+
+        <!-- Selected Filename (Centered Below Button) -->
+        <span id="signature-file-name" class="file-name">No file selected</span>
+    </div>
+
+    <label class="lbl upload-label">Size (page width fraction)</label>
     <input type="number" name="scale" min="0.1" max="0.5" step="0.05" value="0.25" class="input">
     """)
 

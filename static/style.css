@@ -80,6 +80,7 @@ button:disabled, input:disabled {
   border-bottom: 3px solid var(--brand);
   position: sticky;
   top: 0;
+  z-index: 1000; 
 }
 .nav a {
   color: var(--txt);
@@ -91,6 +92,230 @@ button:disabled, input:disabled {
   color: var(--btn);  /* neon yellow hover */
   cursor: url("/static/cursors/link.cur"), pointer;
 }
+
+.nav a.active {
+  color: #00fff7; /* neon cyan glow */
+  text-shadow: 0 0 8px #00fff7, 0 0 16px #00fff7;
+  font-weight: bold;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Glitch effect for navbar brand */
+.nav-left a {
+  position: relative;
+  display: inline-block;
+  font-family: var(--title-font, 'Orbitron', sans-serif);
+  font-size: 1.5rem; /* keep your navbar size */
+  font-weight: 700;
+  color: var(--btn); 
+  text-shadow: 0 0 10px #ffeb3b, 0 0 15px #ffeb3b, 0 0 20px #ffeb3b; /* Yellow glow */
+  text-decoration: none;
+  text-transform: uppercase;
+  animation: glitch-skew 1s infinite linear alternate-reverse;
+}
+
+/* Right side links */
+.cyber-nav a,
+.drop-btn {
+  margin-left: 25px;
+  text-decoration: none;
+  color: #fff;
+  font-size: 1rem;
+  position: relative;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.cyber-nav a:hover,
+.drop-btn:hover {
+  color: #00f0ff;
+  text-shadow: 0 0 8px #00f0ff, 0 0 16px #ff00de;
+}
+
+/* Dropdown base */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 200px;
+  background: #111;
+  border: 1px solid #00f0ff;
+  padding: 10px;
+  box-shadow: 0 0 15px #00f0ff;
+  z-index: 999;
+}
+
+.dropdown-content a {
+  display: block;
+  padding: 8px 12px;
+  color: #fff;
+}
+
+.dropdown-content a:hover {
+  background: #00f0ff;
+  color: black;
+  text-shadow: none;
+}
+
+/* Mega Menu */
+.mega .mega-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;  /* 👈 gap from navbar */
+  width: 900px;
+  max-width: 100vw;
+  background: #111;
+  border: 1px solid #00f0ff;
+  padding: 20px;
+  box-shadow: 0 0 20px #00f0ff;
+  transform: translateX(-20%);
+  /* display: flex; */
+  justify-content: space-between;
+  z-index: 999;
+}
+
+.mega .menu-col {
+  flex: 1;
+  padding: 0 15px;
+}
+
+.mega .menu-col h4 {
+  color: #ff00de;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.mega .menu-col a {
+  display: block;
+  margin: 5px 0;
+  color: #fff;
+  font-size: 0.9rem;
+  transition: 0.2s;
+}
+
+.mega .menu-col a:hover {
+  color: black;
+  background: #00f0ff;
+  padding-left: 5px;
+}
+
+/* Show dropdowns on hover */
+.dropdown:hover .dropdown-content,
+.mega:hover .mega-menu {
+  display: block;
+}
+
+
+
+/* Burger button */
+.burger-menu {
+  display: none; /* hidden on desktop */
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+}
+.burger-menu span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background: #00f0ff;
+  border-radius: 2px;
+}
+
+/* Burger popup overlay */
+.burger-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #111;
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Burger popup menu column styles */
+.burger-popup .menu-col {
+  flex: 1;
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.burger-popup .menu-col h4 {
+  color: #ff00de;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.burger-popup .menu-col a {
+  display: block;
+  margin: 6px 0;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: 0.2s;
+  padding: 6px 0;
+}
+
+.burger-popup .menu-col a:hover {
+  color: black;
+  background: #00f0ff;
+  padding-left: 6px;
+  border-radius: 4px;
+}
+
+
+/* Close button */
+.burger-popup .close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 32px;
+  color: #00f0ff;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Burger menu content */
+.burger-content {
+  margin-top: 60px; /* push below close btn */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Show burger menu on mobile */
+@media (max-width: 900px) {
+  .burger-menu {
+    display: flex;
+  }
+  .nav-right {  /* your desktop menu */
+    display: none;
+  }
+}
+
+
+
+
+
 .logo {
   width: 28px;
   height: 28px;
@@ -117,15 +342,7 @@ button:disabled, input:disabled {
   transform: scale(1.1);
   cursor: url("/static/cursors/link.cur"), pointer;
 }
-.nav-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.nav-left a {
-  color: var(--btn);
-  font-size: 18px;
-}
+
 
 /* Layout */
 main.container {
@@ -171,7 +388,9 @@ h1 {
 
 /* Glitch overlay layers */
 #documorph-title::before,
-#documorph-title::after {
+#documorph-title::after,
+.nav-left a::before,
+.nav-left a::after {
   content: attr(data-text);
   position: absolute;
   top: 0;
@@ -182,14 +401,16 @@ h1 {
 }
 
 /* Cyan glitch layer */
-#documorph-title::before {
+#documorph-title::before,
+.nav-left a::before {
   left: 2px;
   text-shadow: -2px 0 #00fff7;
   animation: glitch1 1.2s infinite linear alternate-reverse;
 }
 
 /* Pink glitch layer */
-#documorph-title::after {
+#documorph-title::after,
+.nav-left a::after {
   left: -2px;
   text-shadow: -2px 0 #ff007f;
   animation: glitch2 1.5s infinite linear alternate-reverse;
@@ -360,25 +581,6 @@ h1 {
   font-weight: bold;
 }
 
-/* Filter */
-.filter-menu {
-  margin-bottom: 20px;
-}
-.filter-btn {
-  padding: 10px 15px;
-  margin: 5px;
-  border: none;
-  background: #01012b;
-  cursor: pointer;
-  border-radius: 6px;
-  color: var(--txt);
-  transition: 0.2s;
-}
-.filter-btn.active {
-  background: var(--brand);
-  color: #fff;
-}
-
 /* Footer */
 .footer {
   background: #01012b;
@@ -455,7 +657,16 @@ h1 {
   cursor: pointer;
   background: #00060e;
   color: var(--txt);
-  transition: all 0.2s ease-in-out;
+  transition: all 0.25s ease-in-out;
+
+  /* Match .pdf-intro font */
+  font-family: var(--pdf-intro-font, 'Orbitron', 'Share Tech Mono', monospace);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+
+  /* Subtle glow */
+  box-shadow: 0 0 6px rgba(57, 196, 182, 0.6);
 }
 
 /* Hover effect */
@@ -463,6 +674,9 @@ h1 {
   background: yellow;
   color: black;
   border-color: yellow;
+
+  /* Stronger glow on hover */
+  box-shadow: 0 0 12px yellow, 0 0 20px rgba(255, 255, 0, 0.6);
   cursor: url("/static/cursors/link.cur"), pointer;
 }
 
@@ -471,6 +685,9 @@ h1 {
   background: yellow;
   color: black;
   border-color: yellow;
+
+  /* Persistent glow for active */
+  box-shadow: 0 0 12px yellow, 0 0 20px rgba(255, 255, 0, 0.6);
 }
 
 
@@ -545,6 +762,7 @@ h1 {
 
 /* Cyberpunk Choose File Button */
 .cyberpunk-btn {
+  width: 100%;
   display: inline-block;
   background: #00060e;
   color: #ffeb3b;
