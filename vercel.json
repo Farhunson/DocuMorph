@@ -1,14 +1,8 @@
 {
   "builds": [
-    {
-      "src": "DocuMorph/DocuMorph/app.py",
-      "use": "@vercel/python"
-    }
+    { "src": "api/index.py", "use": "@vercel/python" }
   ],
   "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "DocuMorph/DocuMorph/app.py"
-    }
+    { "src": "/(.*)", "dest": "api/index.py" }
   ]
 }
