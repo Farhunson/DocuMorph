@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ title or 'Results' }}</h2>
+<ul class="list">
+  {% for f in files %}
+    <li><a href="{{ url_for('download', filename=f) }}">{{ f }}</a></li>
+  {% endfor %}
+</ul>
+<p><a href="{{ url_for('home') }}">Back to Tools</a></p>
+{% endblock %}

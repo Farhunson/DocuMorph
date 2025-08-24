@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ title }}</h2>
+<form id="uploadForm" method="post" enctype="multipart/form-data" class="form">
+
+  <!-- Upload label (centered) -->
+  <label class="lbl upload-label">Upload file{{ 's' if multiple else '' }}</label>
+  
+  <div class="file-upload-container">
+    {% if multiple %}
+      <input type="file" name="files" id="fileInput" multiple accept="{{ accept or '' }}" hidden required>
+    {% else %}
+      <input type="file" name="file" id="fileInput" accept="{{ accept or '' }}" hidden required>
+    {% endif %}
+
+    <!-- Cyberpunk Choose File Button -->
+    <label for="fileInput" class="cyberpunk-btn" data-text="Choose File">
+      <span class="btn-text">Choose File</span>
+    </label>
+
+    <!-- Selected Filename (Centered Below Button) -->
+    <span id="file-name" class="file-name">No file selected</span>
+  </div>
+
+  {{ extra_controls|safe if extra_controls else '' }}
+  <button class="btn process-btn" type="submit">Process</button>
+</form>
+
+<!-- 🚀 Progress bar -->
+<div id="progressWrapper" style="display:none;">
+  <div id="progressBar"></div>
+  <span id="progressText">0%</span>
+</div>
+
+<div id="downloadLink"></div>
+{% endblock %}

@@ -1,0 +1,30 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+
+# Environment
+.env
+venv/
+.venv/
+
+
+# IDE files
+.vscode/
+.idea/
+
+
+# Logs
+*.log
+
+
+# Flask instance & uploads
+instance/
+uploads/
+outputs/
+
+
+# System files
+.DS_Store
+Thumbs.db

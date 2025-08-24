@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title or "DOCUMORPH" }}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="{{ url_for('static', filename='videos/bg.mp4') }}" type="video/mp4">
+        </video>
+        <div class="video-overlay"></div>
+    </div>
+
+  <nav class="nav">
+    <div class="nav-left">
+      <img src="{{ url_for('static', filename='logo.svg') }}" alt="logo" class="logo">
+      <a href="{{ url_for('home') }}">DocuMorph</a>
+    </div>
+    <div class="nav-right">
+      <a href="{{ url_for('home') }}">All Tools</a>
+    </div>
+  </nav>
+  <main class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash">
+          {% for m in messages %}<div>{{ m }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='cursor.js') }}"></script>
+
+</body>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Columns -->
+    <!-- <div class="footer-columns">
+      <div class="footer-col">
+        <h4>PRODUCT</h4>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Tools</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>RESOURCES</h4>
+        <ul>
+          <li><a href="#">Docs</a></li>
+          <li><a href="#">API</a></li>
+          <li><a href="#">Medium</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>SOLUTIONS</h4>
+        <ul>
+          <li><a href="#">Business</a></li>
+          <li><a href="#">Education</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>LEGAL</h4>
+        <ul>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms & Conditions</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>COMPANY</h4>
+        <ul>
+          <li><a href="#">About Us</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Press</a></li>
+        </ul>
+      </div>
+    </div> -->
+
+    <!-- Social Links -->
+<!-- Social Links -->
+<div class="footer-social">
+    <a href="https://www.instagram.com/farhunson" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://github.com/Farhunson" target="_blank"><i class="fab fa-github"></i></a>
+    <a href="https://www.linkedin.com/in/mfarhanw" target="_blank"><i class="fab fa-linkedin"></i></a>
+    <a href="https://medium.com/@mfarhanwajdi" target="_blank"><i class="fab fa-medium"></i></a>
+</div>
+
+
+
+    <!-- Bottom Line -->
+    <div class="footer-bottom">
+        <p>&copy;{{ current_year }} Farhunson. All rights reserved.</p>
+    </div>
+  </div>
+</footer>
+</html>

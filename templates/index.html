@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="hero">
+  <img src="{{ url_for('static', filename='logo.svg') }}" alt="DocuMorph Logo" class="hero-logo">
+  <h1 id="documorph-title" class="pdf-title">DocuMorph</h1>
+</div>
+
+<p class="pdf-subtitle">
+  Manage your PDFs without the hassle
+</p>
+
+<p class="pdf-intro">
+  Merge, split, convert, protect, and more.<br>
+  Simple tools, built to just work.
+</p>
+<!-- Filter Buttons -->
+<div class="filter-buttons">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="organize">Organize PDF</button>
+  <button class="filter-btn" data-filter="convert">Convert PDF</button>
+  <button class="filter-btn" data-filter="optimize">Optimize PDF</button>
+  <button class="filter-btn" data-filter="security">PDF Security</button>
+  <button class="filter-btn" data-filter="edit">Edit PDF</button>
+</div>
+
+<!-- Cards Grid -->
+<div class="grid">
+  <!-- Organize -->
+  <a class="card organize" href="{{ url_for('merge') }}"><h3>Merge PDF</h3><p>Combine multiple PDFs into one.</p></a>
+  <a class="card organize" href="{{ url_for('split') }}"><h3>Split PDF</h3><p>Split every page to a new PDF.</p></a>
+  <a class="card organize" href="{{ url_for('reorder_pages_route') }}"><h3>Reorder Pages</h3><p>Rearrange page order.</p></a>
+  <a class="card organize" href="{{ url_for('rotate') }}"><h3>Rotate</h3><p>Rotate all pages.</p></a>
+  
+  <!-- Convert -->
+  <a class="card convert" href="{{ url_for('pdf_to_word') }}"><h3>PDF → Word</h3><p>Convert to DOCX.</p></a>
+  <a class="card convert" href="{{ url_for('pdf_to_excel_route') }}"><h3>PDF → Excel</h3><p>Convert tables to XLSX.</p></a>
+  <a class="card convert" href="{{ url_for('pdf_to_html_route') }}"><h3>PDF → HTML</h3><p>Convert to web page.</p></a>
+  <a class="card convert" href="{{ url_for('pdf_to_images_route') }}"><h3>PDF → Images</h3><p>Export pages as PNG/JPG.</p></a>
+  <a class="card convert" href="{{ url_for('images_to_pdf_route') }}"><h3>Images → PDF</h3><p>Build PDF from images.</p></a>
+  <a class="card convert" href="{{ url_for('office_to_pdf_route') }}"><h3>Office → PDF</h3><p>DOCX/XLSX/PPTX to PDF.</p></a>
+  <a class="card convert" href="{{ url_for('extract_text_route') }}"><h3>Extract Text</h3><p>Save as .txt</p></a>
+  <a class="card convert" href="{{ url_for('extract_images_route') }}"><h3>Extract Images</h3><p>Save all embedded images.</p></a>
+  <a class="card convert" href="{{ url_for('pdf_ocr_route') }}"><h3>OCR PDF</h3><p>Scan & extract searchable text.</p></a>
+
+  <!-- Optimize -->
+  <a class="card optimize" href="{{ url_for('compress') }}"><h3>Compress PDF</h3><p>Reduce file size.</p></a>
+  <a class="card optimize" href="{{ url_for('watermark') }}"><h3>Watermark</h3><p>Overlay watermark PDF.</p></a>
+
+  <!-- Security -->
+  <a class="card security" href="{{ url_for('protect') }}"><h3>Protect PDF</h3><p>Password protect.</p></a>
+  <a class="card security" href="{{ url_for('unlock') }}"><h3>Unlock PDF</h3><p>Remove password.</p></a>
+
+  <!-- Edit -->
+  <a class="card edit" href="{{ url_for('sign') }}"><h3>Sign PDF</h3><p>Add image signature.</p></a>
+</div>
+
+
+{% endblock %}
