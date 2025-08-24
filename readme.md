@@ -16,7 +16,7 @@
 ✅ **OCR Support** — Extract text from scanned PDFs and images  
 ✅ **Extract Tables** — Convert PDF tables into Excel format  
 ✅ **Excel Support** — Read, generate, and modify Excel files  
-✅ **Cyberpunk UI** — Stylish, modern, and responsive design
+✅ **Cyberpunk Inspired UI** — Stylish, modern, and responsive design
 
 ---
 
