@@ -21,7 +21,7 @@ ALLOWED_IMAGES = {"png", "jpg", "jpeg"}
 ALLOWED_OFFICE = {"doc", "docx", "xls", "xlsx", "ppt", "pptx"}
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key = "HunsonMorales1999"
 os.makedirs(UPLOADS, exist_ok=True)
 os.makedirs(OUTPUTS, exist_ok=True)
 
