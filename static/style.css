@@ -240,7 +240,7 @@ button:disabled, input:disabled {
 
   background: rgba(5, 5, 25, 0.85);
   border: 2px solid #00f0ff;
-  padding: 10px;
+  padding: 5px;
   z-index: 50;
 
   /* angled cyberpunk panel */
