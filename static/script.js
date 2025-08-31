@@ -165,3 +165,19 @@ function updateFileName() {
 
 document.getElementById("fileInput").addEventListener("change", updateFileName);
 
+/* BURGER MENU SCRIPT */
+document.addEventListener("DOMContentLoaded", () => {
+  const burger = document.querySelector(".burger-menu");
+  const popup = document.querySelector(".burger-popup");
+  const closeBtn = popup.querySelector(".close-btn");
+
+  burger.addEventListener("click", () => {
+    popup.classList.add("active");   // show popup
+    burger.style.display = "none";   // hide burger
+  });
+
+  closeBtn.addEventListener("click", () => {
+    popup.classList.remove("active"); 
+    burger.style.display = "flex";   // show burger again
+  });
+});
