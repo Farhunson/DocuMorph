@@ -1,7 +1,8 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify, after_this_request
 from datetime import datetime
+import tempfile
+
 
 from pdf_ops.tools import (
     merge_pdfs, split_pdf, compress_pdf,
@@ -9,21 +10,48 @@ from pdf_ops.tools import (
     sign_pdf_with_image, extract_text, pdf_to_docx,
     pdf_to_images, images_to_pdf, office_to_pdf, 
     extract_images, pdf_to_excel, pdf_to_html, pdf_ocr,
-    reorder_pages,UPLOADS, OUTPUTS
+    reorder_pages
 )
 import threading, time, zipfile
 from uuid import uuid4
 
 
+# Function to clean old files every hour
+def cleanup_old_files():
+    while True:
+        now = time.time()
+        for folder in [UPLOADS, OUTPUTS]:
+            for f in os.listdir(folder):
+                path = os.path.join(folder, f)
+                if os.path.isfile(path) and now - os.path.getmtime(path) > 600:  # 1 hour
+                    try:
+                        os.remove(path)
+                    except:
+                        pass
+        time.sleep(600)  # Check every 10 minutes
+
+# Start cleanup thread
+threading.Thread(target=cleanup_old_files, daemon=True).start()
+
 progress = {}  # track progress per task
+# Allowed file types
 ALLOWED_PDF = {"pdf"}
-ALLOWED_IMAGES = {"png", "jpg", "jpeg"}
+ALLOWED_WORD = {"doc", "docx"}
+ALLOWED_IMAGE = {"jpg", "jpeg", "png"}
+ALLOWED_EXCEL = {"xls", "xlsx"}
 ALLOWED_OFFICE = {"doc", "docx", "xls", "xlsx", "ppt", "pptx"}
+ALLOWED_ALL = ALLOWED_PDF | ALLOWED_WORD | ALLOWED_IMAGE | ALLOWED_EXCEL | {"ppt", "pptx"}
 
 app = Flask(__name__)
 app.secret_key = "HunsonMorales1999"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# UPLOADS = tempfile.mkdtemp(prefix="uploads_")
+# OUTPUTS = tempfile.mkdtemp(prefix="outputs_")
+UPLOADS = os.path.join(BASE_DIR, "uploads")
+OUTPUTS = os.path.join(BASE_DIR, "outputs")
 os.makedirs(UPLOADS, exist_ok=True)
 os.makedirs(OUTPUTS, exist_ok=True)
+
 
 # --- Async task registry ---
 TASKS = {}  # task_id -> dict(status, progress, output, error)
@@ -96,11 +124,26 @@ def home():
     return render_template("index.html")
 
 # -------- Generic download --------
+
+# @app.route("/download/<path:filename>")
+# def download(filename):
+#     return send_from_directory(OUTPUTS, filename, as_attachment=True)
+
 @app.route("/download/<path:filename>")
 def download(filename):
-    return send_from_directory(OUTPUTS, filename, as_attachment=True)
+    # First, check in OUTPUTS
+    file_path = os.path.join(OUTPUTS, filename)
+    if os.path.exists(file_path):
+        return send_from_directory(OUTPUTS, filename, as_attachment=True)
 
-# -------- Merge --------
+    # Fallback: also check UPLOADS in case tool saved there
+    file_path = os.path.join(UPLOADS, filename)
+    if os.path.exists(file_path):
+        return send_from_directory(UPLOADS, filename, as_attachment=True)
+
+    flash("File not found.")
+    return redirect(url_for("home"))
+
 # -------- Merge --------
 @app.route("/merge", methods=["GET", "POST"])
 def merge():
@@ -108,9 +151,13 @@ def merge():
         files = request.files.getlist("files")
         paths = []
         for f in files:
-            if f and allowed(f.filename, ALLOWED_PDF):
-                p = os.path.join(UPLOADS, secure_filename(f.filename))
-                f.save(p); paths.append(p)
+            if not f or f.filename.strip() == "":
+                continue
+            try:
+                p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF)
+                paths.append(p)
+            except ValueError:
+                flash(f"Invalid file skipped: {f.filename}")
         if not paths:
             flash("Please upload at least one PDF.")
             return redirect(request.url)
@@ -121,6 +168,10 @@ def merge():
             return jsonify({"task_id": task_id})
         else:
             out = merge_pdfs(paths)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Merge PDF", multiple=True, accept=".pdf")
@@ -132,8 +183,7 @@ def split():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Please upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, split_pdf, p)  # returns list -> zipped for AJAX
@@ -152,14 +202,17 @@ def compress():
         quality = request.form.get("quality", "screen")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Please upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, compress_pdf, p, quality=quality)
             return jsonify({"task_id": task_id})
         else:
             out = compress_pdf(p, quality=quality)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Compress PDF", accept=".pdf", extra_controls="""
@@ -179,14 +232,17 @@ def pdf_to_word():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Please upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, pdf_to_docx, p)
             return jsonify({"task_id": task_id})
         else:
             out = pdf_to_docx(p)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="PDF to Word", accept=".pdf")
@@ -199,8 +255,7 @@ def pdf_to_images_route():
         fmt = request.form.get("fmt", "png")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Please upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, pdf_to_images, p, fmt=fmt)  # list -> zipped
@@ -224,8 +279,9 @@ def images_to_pdf_route():
         files = request.files.getlist("files")
         paths = []
         for f in files:
-            if f and allowed(f.filename, ALLOWED_IMAGES):
-                p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p); paths.append(p)
+            if f and allowed(f.filename, ALLOWED_IMAGE):
+                p = save_uploaded_file(f, UPLOADS, ALLOWED_IMAGE)
+                paths.append(p)
         if not paths:
             flash("Upload JPG/PNG images."); return redirect(request.url)
 
@@ -235,6 +291,10 @@ def images_to_pdf_route():
             return jsonify({"task_id": task_id})
         else:
             out = images_to_pdf(paths)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out            
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Images to PDF", multiple=True, accept=".png,.jpg,.jpeg")
@@ -246,8 +306,7 @@ def office_to_pdf_route():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_OFFICE):
             flash("Upload DOCX/XLSX/PPTX."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_OFFICE);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, office_to_pdf, p)
@@ -255,6 +314,10 @@ def office_to_pdf_route():
         else:
             try:
                 out = office_to_pdf(p)
+                if os.path.dirname(out) != OUTPUTS:
+                    new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                    os.rename(out, new_out)
+                    out = new_out
                 return render_template("result_single.html", file=os.path.basename(out))
             except Exception as e:
                 flash(str(e)); return redirect(request.url)
@@ -271,8 +334,8 @@ def watermark():
             flash("Upload a PDF."); return redirect(request.url)
         if not wm or not allowed(wm.filename, ALLOWED_PDF):
             flash("Upload a watermark PDF (single page)."); return redirect(request.url)
-        p1 = os.path.join(UPLOADS, secure_filename(pdf.filename)); pdf.save(p1)
-        p2 = os.path.join(UPLOADS, secure_filename(wm.filename)); wm.save(p2)
+        p1 = save_uploaded_file(pdf, UPLOADS, ALLOWED_PDF)
+        p2 = save_uploaded_file(wm, UPLOADS, ALLOWED_PDF)
 
         if is_ajax(request):
             task_id = uuid4().hex
@@ -280,6 +343,10 @@ def watermark():
             return jsonify({"task_id": task_id})
         else:
             out = watermark_pdf(p1, p2)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Watermark PDF", accept=".pdf", extra_controls="""
@@ -313,14 +380,17 @@ def rotate():
         angle = int(request.form.get("angle", "90"))
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, rotate_pdf, p, angle=angle)
             return jsonify({"task_id": task_id})
         else:
             out = rotate_pdf(p, angle=angle)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Rotate PDF", accept=".pdf", extra_controls="""
@@ -342,14 +412,17 @@ def protect():
             flash("Upload a PDF."); return redirect(request.url)
         if not pwd:
             flash("Enter a password."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, protect_pdf, p, pwd)
             return jsonify({"task_id": task_id})
         else:
             out = protect_pdf(p, pwd)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Protect PDF", accept=".pdf", extra_controls="""
@@ -364,8 +437,7 @@ def unlock():
         pwd = request.form.get("password", "")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, unlock_pdf, p, pwd)
@@ -373,6 +445,10 @@ def unlock():
         else:
             try:
                 out = unlock_pdf(p, pwd)
+                if os.path.dirname(out) != OUTPUTS:
+                    new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                    os.rename(out, new_out)
+                    out = new_out
                 return render_template("result_single.html", file=os.path.basename(out))
             except Exception as e:
                 flash(str(e)); return redirect(request.url)
@@ -390,14 +466,17 @@ def extract_text_route():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename)); f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, extract_text, p)
             return jsonify({"task_id": task_id})
         else:
             out = extract_text(p)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Extract Text", accept=".pdf")
@@ -411,10 +490,10 @@ def sign():
         scale = float(request.form.get("scale", "0.25"))
         if not pdf or not allowed(pdf.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        if not img or not allowed(img.filename, ALLOWED_IMAGES):
+        if not img or not allowed(img.filename, ALLOWED_IMAGE):
             flash("Upload a PNG/JPG signature image."); return redirect(request.url)
-        p1 = os.path.join(UPLOADS, secure_filename(pdf.filename)); pdf.save(p1)
-        p2 = os.path.join(UPLOADS, secure_filename(img.filename)); img.save(p2)
+        p1 = save_uploaded_file(pdf, UPLOADS, ALLOWED_PDF)
+        p2 = save_uploaded_file(img, UPLOADS, ALLOWED_IMAGE)
 
         if is_ajax(request):
             task_id = uuid4().hex
@@ -422,6 +501,10 @@ def sign():
             return jsonify({"task_id": task_id})
         else:
             out = sign_pdf_with_image(p1, p2, scale=scale)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Sign PDF", accept=".pdf", extra_controls="""
@@ -450,9 +533,7 @@ def extract_images_route():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename))
-        f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, extract_images, p)  # returns list -> zipped
@@ -473,15 +554,17 @@ def pdf_to_excel_route():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename))
-        f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, pdf_to_excel, p)
             return jsonify({"task_id": task_id})
         else:
             out = pdf_to_excel(p)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="PDF to Excel", accept=".pdf")
@@ -494,15 +577,17 @@ def pdf_to_html_route():
         f = request.files.get("file")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename))
-        f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, pdf_to_html, p)
             return jsonify({"task_id": task_id})
         else:
             out = pdf_to_html(p)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="PDF to HTML", accept=".pdf")
@@ -516,15 +601,17 @@ def pdf_ocr_route():
         lang = request.form.get("lang", "eng")
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a scanned PDF."); return redirect(request.url)
-        p = os.path.join(UPLOADS, secure_filename(f.filename))
-        f.save(p)
-
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         if is_ajax(request):
             task_id = uuid4().hex
             run_async(task_id, pdf_ocr, p, lang=lang)
             return jsonify({"task_id": task_id})
         else:
             out = pdf_ocr(p, lang=lang)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="OCR PDF", accept=".pdf", extra_controls="""
@@ -542,11 +629,10 @@ def reorder_pages_route():
         if not f or not allowed(f.filename, ALLOWED_PDF):
             flash("Upload a PDF."); return redirect(request.url)
         if not new_order:
-            flash("Enter new page order (e.g., 2,1,3)").strip()
+            flash("Enter new page order (e.g., 2,1,3)");
             return redirect(request.url)
 
-        p = os.path.join(UPLOADS, secure_filename(f.filename))
-        f.save(p)
+        p = save_uploaded_file(f, UPLOADS, ALLOWED_PDF);
         try:
             order_list = [int(x.strip()) for x in new_order.split(",") if x.strip().isdigit()]
         except:
@@ -558,6 +644,10 @@ def reorder_pages_route():
             return jsonify({"task_id": task_id})
         else:
             out = reorder_pages(p, order_list)
+            if os.path.dirname(out) != OUTPUTS:
+                new_out = os.path.join(OUTPUTS, os.path.basename(out))
+                os.rename(out, new_out)
+                out = new_out
             return render_template("result_single.html", file=os.path.basename(out))
 
     return render_template("tool_upload.html", title="Reorder Pages", accept=".pdf", extra_controls="""
@@ -565,6 +655,24 @@ def reorder_pages_route():
     <input type="text" name="order" required class="input">
     """)
 
+
+def save_uploaded_file(f, folder, allowed_exts=None):
+    # Check if file exists
+    if not f or f.filename.strip() == "":
+        raise ValueError("No file selected.")
+
+    # Extract and validate extension
+    ext = f.filename.rsplit(".", 1)[-1].lower()
+    if allowed_exts and ext not in allowed_exts:
+        raise ValueError(f"Invalid file type: .{ext} not allowed")
+
+    # Generate unique filename
+    unique_name = f"{uuid4().hex}.{ext}"
+    path = os.path.join(folder, unique_name)
+
+    # Save the file securely
+    f.save(path)
+    return path
 
 @app.context_processor
 def inject_year():
