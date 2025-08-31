@@ -13,4 +13,4 @@ COPY . .
 EXPOSE 3000
 
 # Start Flask with Gunicorn
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:3000", "main:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:3000", "app:app"]
