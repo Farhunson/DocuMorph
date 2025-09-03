@@ -4,17 +4,22 @@
 <div class="hero">
   <!-- <img src="{{ url_for('static', filename='logo.svg') }}" alt="DocuMorph Logo" class="hero-logo"> -->
   <h1 id="documorph-title" class="pdf-title">DocuMorph</h1>
+  <p class="pdf-subtitle">
+    PDFs. Reimagined.
+  </p>
+  <p class="pdf-intro">
+    Merge, split, convert, encrypt<br>
+    Precision tools for the digital frontier.
+  </p>
 </div>
 
-<p class="pdf-subtitle">
-    PDFs. Reimagined.
-</p>
 
-<p class="pdf-intro">
-  Merge, split, convert, encrypt<br>
-  Precision tools for the digital frontier.
-</p>
 <!-- Filter Buttons -->
+<div class="dummy-buttons">
+  <button class="minimize"></button>
+  <button class="fullscreen"></button>
+  <button class="close"></button>
+</div>
 <div class="filter-buttons">
   <button class="filter-btn active" data-filter="all">All</button>
   <button class="filter-btn" data-filter="organize">Organize PDF</button>
@@ -23,7 +28,15 @@
   <button class="filter-btn" data-filter="security">PDF Security</button>
   <button class="filter-btn" data-filter="edit">Edit PDF</button>
 </div>
-
+<!-- Filter Dropdown (mobile) -->
+<select class="filter-dropdown">
+  <option value="all" selected>All</option>
+  <option value="organize">Organize PDF</option>
+  <option value="convert">Convert PDF</option>
+  <option value="optimize">Optimize PDF</option>
+  <option value="security">PDF Security</option>
+  <option value="edit">Edit PDF</option>
+</select>
 <!-- Cards Grid -->
 <div class="grid">
   <!-- Organize -->

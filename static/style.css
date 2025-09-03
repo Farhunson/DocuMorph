@@ -515,7 +515,7 @@ button:disabled, input:disabled {
 .hero-logo {
   width: 100px;
   height: auto;
-  margin-bottom: 8px;
+  margin-bottom: 0px;
   filter: drop-shadow(0 0 8px #00f6ff) drop-shadow(0 0 16px #00f6ff);
   transition: transform 0.3s ease-in-out;
 }
@@ -621,15 +621,43 @@ h1 {
   100% { clip: rect(0, 9999px, 0, 0); }
 }
 
-
 .pdf-subtitle {
   font-family: 'Orbitron', sans-serif;
   text-align: center;
-  color: #39c4b6;
+  color: #0d0d0d; /* solid text on bright background for contrast */
   font-size: 1.1em;
-  margin-bottom: 8px;
-  text-shadow: 0 0 6px rgba(57, 196, 182, 0.8);
+  margin-bottom: 0px;
+
+  /* Solid background with cyberpunk glow */
+  background: var(--muted);
+  display: inline-block;
+  padding: 8px 16px;
+  border: 2px solid var(--muted);
+  border-radius: 0 0 12px 0; /* only bottom-right corner rounded */
+
+  /* Glow + neon effect */
+  box-shadow: 
+    0 0 12px var(--muted),
+    0 0 24px rgba(0,255,247,0.6);
+
+  /* Sharp, "panel-like" look */
+  clip-path: polygon(
+    0 0, 100% 0, 100% 100%, calc(100% - 12px) 100%, 0 100%
+  );
+
+  /* Text glow to make it pop */
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+
+  transition: box-shadow 0.2s, transform 0.1s;
 }
+
+.pdf-subtitle:hover {
+  box-shadow: 
+    0 0 18px var(--muted),
+    0 0 32px rgba(0,255,247,0.8);
+  transform: scale(1.03);
+}
+
 
 .pdf-intro {
   font-family: 'Share Tech Mono', monospace;
@@ -638,62 +666,171 @@ h1 {
   font-size: 1em;
   margin-bottom: 25px;
   text-shadow: 0 0 6px rgba(0, 255, 255, 0.5);
+
+  /* NEW: background highlight */
+  display: inline-block;
+  padding: 6px 12px;
+  background: rgba(0, 255, 255, 0.08);
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.25);
 }
+
+
 
 
 /* Cards */
+body {
+  margin: 0;
+  padding: 0;
+  background: #0d0d0d; /* dark cyberpunk base */
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* Grid container with cyberpunk border and gradient */
+/* GRID CONTAINER */
 .grid {
   display: grid;
-  max-width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  gap: 24px;
+  padding: 32px;
+
+  /* Glassy, semi-transparent background */
+  background: rgba(17, 17, 17, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  border-top: 0px solid;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  border-left: 2px solid var(--muted); 
+  border-radius: 0;
+
+  /* Top-left, top-right, bottom-left: pointy | bottom-right: chipped */
+  clip-path: polygon(
+    0% 0%,      /* top-left pointy */
+    100% 0%,    /* top-right pointy */
+    100% 90%,   /* bottom-right starts chip */
+    95% 100%,   /* bottom-right chipped inset */
+    0% 100%     /* bottom-left pointy */
+  );
+
+
+  /* Scanline texture */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+
+  box-shadow: 0 0 12px #00f0ff, inset 0 0 16px rgba(50,200,200,0.2);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
+
+
+
+
+/* CARD STYLING */
 .card {
   position: relative;
-  background: var(--card);
-  color: inherit;
-  padding: 26px;
+  color: var(--txt);
+  padding: 24px;
   margin: 5px;
   border: 2px solid var(--brand);
 
-  /* asymmetric trapezoid — left side cut shallower, right side more angled */
-  clip-path: polygon(0 0, 95% 0, 100% 15%, 100% 100%, 5% 100%, 0 85%);
+  /* Asymmetric cyberpunk panel */
+  clip-path: polygon(0 0, 95% 0, 100% 12%, 100% 100%, 5% 100%, 0 88%);
+  background: (0,255,255,1);
 
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  box-shadow: 0 0 12px rgba(84,193,230,0.2);
+  /* Scanline + inset glow */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0,255,255,0.03) 0px,
+    rgba(0,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  box-shadow: 0 0 12px var(--muted), inset 0 0 16px rgba(50,50,200,0.25);
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
 }
+
 .card h3 {
   margin: 0 0 8px 0;
   color: var(--btn);
+  text-shadow: 0 0 6px var(--btn), 0 0 12px var(--brand);
 }
+
 .card p {
   margin: 0;
-  color: var(--muted);
+  color: var(--txt);
 }
+
+/* Hover effect */
 .card:hover {
-  border-color: #00fff7;
-  background: rgba(0,255,247,0.08);
-  box-shadow: 0 0 18px #00fff7, 0 0 32px rgba(255,0,127,0.35);
-  transform: translateY(-4px);
+  border-color: var(--muted);
+  background: rgba(0,255,247,0.12);
+  box-shadow: 0 0 20px var(--brand), inset 0 0 20px rgba(255,0,127,0.25);
+  transform: translateY(-2px);
 }
-.card::after, .filter-btn::after {
+
+.card:hover h3{
+  color: var(--brand);
+  text-shadow: 0 0 8px var(--brand), 0 0 16px var(--muted);
+}
+.card:hover p{
+  color: var(--muted);
+  text-shadow: 0 0 8px var(--muted), 0 0 16px var(--muted);
+}
+/* Small neon accent like .form */
+.card::after {
   content: "";
   position: absolute;
-  top: 0; right: 0;
-  width: 30px; height: 3px;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 3px;
   background: var(--brand);
   transform: rotate(45deg);
+  box-shadow: 0 0 8px var(--brand), 0 0 12px rgba(255,0,127,0.2);
 }
+
+
+
+
 /* Forms */
 .form {
+  position: relative;
   background: var(--card);
-  border: 1px solid #005678;
-  border-radius: 12px;
-  padding: 18px;
-  box-shadow: 0 0 10px rgba(5,217,232,0.4);
+  border: 2px solid var(--brand);
+  border-radius: 0; /* we'll use clip-path for shape */
+  padding: 24px;
+  box-shadow: 0 0 12px rgba(0, 255, 247, 0.3), inset 0 0 16px rgba(255, 0, 127, 0.2);
   min-width: 300px;
+
+  /* Asymmetric cyberpunk panel */
+  clip-path: polygon(0 0, 95% 0, 100% 12%, 100% 100%, 5% 100%, 0 88%);
+
+  /* Scanline texture */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.form:hover {
+  border-color: var(--btn);
+  box-shadow: 0 0 20px var(--brand), inset 0 0 20px rgba(0, 255, 247, 0.4);
+  transform: translateY(-2px);
 }
 .lbl {
   display: block;
@@ -754,37 +891,67 @@ h1 {
 }
 
 /* Progress Bar */
+/* Cyberpunk Progress Bar Wrapper */
 #progressWrapper {
   margin-top: 20px;
   width: 100%;
-  background: #01012b;
-  border-radius: 6px;
-  overflow: hidden;
   height: 30px;
   position: relative;
-  box-shadow: 0 0 10px rgba(84,193,230,0.3);
+  
+  /* Cyberpunk panel */
+  background: rgba(1, 1, 43, 0.85); /* deep midnight base */
+  border: 2px solid var(--brand);
+  border-radius: 8px;
+  
+  /* Angled symmetrical look */
+  clip-path: polygon(5% 0%, 95% 0%, 100% 15%, 100% 85%, 95% 100%, 5% 100%, 0% 85%, 0% 15%);
+  
+  /* Neon glow */
+  box-shadow: 0 0 12px var(--brand), inset 0 0 10px rgba(0,255,247,0.3);
+
+  /* Subtle scanline texture */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  overflow: hidden;
 }
+
+/* Progress Bar */
 #progressBar {
-  background: var(--brand);
   height: 100%;
   width: 0%;
-  transition: width 0.3s;
+  background: var(--brand); /* solid color */
+  
+  /* Slight inner glow */
+  box-shadow: 0 0 8px var(--btn), inset 0 0 6px rgba(255,0,127,0.3);
+  transition: width 0.3s ease-in-out;
 }
+
+/* Progress Text */
 #progressText {
   position: absolute;
-  color: var(--txt);
   width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  top: 4px;
   font-weight: bold;
+  color: var(--txt);
+  text-shadow: 0 0 6px var(--btn), 0 0 12px var(--brand);
+  pointer-events: none;
 }
+
 
 /* Footer */
 .footer {
   background: rgba(5, 5, 25, 0.95);
   color: #e5e5f7;
   padding: 50px 20px;
-  border-top: 2px solid #00f0ff;
+  border-top: 2px solid var(--muted);
 
   /* neon glow */
   box-shadow: 0 -4px 12px rgba(0, 240, 255, 0.3),
@@ -872,96 +1039,243 @@ h1 {
   cursor: url("/static/cursors/link.cur"), pointer;
 }
 
-/* Bottom bar */
 .footer-bottom {
   text-align: center;
-  font-size: 12px;
-  color: #39c4b6;
-  border-top: 1px solid rgba(0,240,255,0.2);
-  padding-top: 12px;
-  margin-top: 20px;
-  letter-spacing: 0.05em;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #aaaadf;
 }
 
-/* Filter buttons (categories) */
+
+/* Filter buttons container (tab bar) */
+
 .filter-buttons {
+  display: flex;
+  flex-wrap: wrap; /* ✅ allow wrapping when needed */
+  justify-content: flex-start;
+  gap: 0;
   max-width: 100%;
   overflow-x: hidden;
-  box-sizing: border-box;
-  margin-bottom: 20px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
+  padding: 0;
+
+  /* Same glassy background as grid */
+  background: rgba(17, 17, 17, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+
+  border-top: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  border-right: 2px solid var(--muted);
+  border-left: 2px solid var(--muted);
+  box-shadow: 0 0 5px var(--muted), inset 0 0 16px rgba(50,200,200,0.2);
 }
 
+/* Individual tabs (default: behave like browser tabs on desktop) */
 .filter-btn {
-  /* CYBERPUNK FONT */
+  flex: 0 0 auto; /* ✅ natural width like tabs */
+  text-align: center;
+  padding: 12px 20px;
   font-family: 'Orbitron', 'Share Tech Mono', monospace;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   -webkit-font-smoothing: antialiased;
 
-  /* SHAPE + BASE STYLING */
-  position: relative;
-  background: var(--card);
+  /* Match grid look */
+  background: rgba(17, 17, 17, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+
+  border: none;
+  border-radius: 0;
   color: var(--txt);
-  padding: 10px 18px;
-  margin: 6px;
-  border: 2px solid var(--muted);
-  clip-path: polygon(12% 0, 100% 0, 100% 75%, 88% 100%, 0 100%, 0 25%);
-  transition: all 0.25s ease-in-out;
-
-  /* NEON TEXTURE */
-  text-shadow: 0 0 6px rgba(0,255,247,0.8), 0 0 12px rgba(255,0,127,0.5);
-  box-shadow: 0 0 6px rgba(57,196,182,0.6);
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  cursor: pointer;
 }
 
-/* Hover effect */
-.filter-btn:hover {
-  border-color: var(--brand);
-  background: rgba(0,255,247,0.12);
-  box-shadow: 0 0 14px var(--brand), 0 0 24px rgba(0,255,247,0.4);
-  transform: translateY(-2px);
-  cursor: url("/static/cursors/link.cur"), pointer;
-}
-
-/* Active (selected) state */
+/* Active tab */
 .filter-btn.active {
-  border-color: var(--brand);
   background: var(--brand);
   color: #000;
-  box-shadow: 0 0 18px var(--brand), inset 0 0 6px rgba(0,0,0,0.6);
+  box-shadow: 0 0 12px var(--brand), inset 0 0 6px rgba(0,255,247,0.2);
+}
+
+/* Hover effect stays minimal for desktop users */
+@media (hover: hover) {
+  .filter-btn:hover {
+    background: var(--brand);
+    box-shadow: 0 0 10px var(--brand);
+  }
+}
+
+/* Hide dropdown on desktop, show on mobile */
+.filter-dropdown {
+  display: none;
+  width: 100%;
+  background: var(--brand);
+  color: var(--card);
+  font-family: 'Orbitron', 'Share Tech Mono', monospace;
+  font-weight: 900; /* stronger weight */
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border: 2px solid var(--muted);
+  padding: 15px 40px 15px 15px; /* extra space for custom arrow */
+  margin-bottom: 0px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 0 10px rgba(0, 255, 247, 0.3);
+  position: relative;
+  appearance: none; /* remove default arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Custom arrow */
+.filter-dropdown::after {
+  content: "▼";
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--card);
+  text-shadow: 0 0 5px rgba(0, 255, 247, 0.8);
+  pointer-events: none;
+  transition: transform 0.3s ease;
+}
+
+/* Animate arrow on focus */
+.filter-dropdown:focus::after {
+  transform: translateY(-50%) rotate(180deg);
+  text-shadow: 0 0 10px rgba(0, 255, 247, 1);
+}
+
+/* Cyberpunk window control bar */
+.dummy-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+
+  background: rgba(17, 17, 17, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0,200,255,0.20) 0px,
+    rgba(0,200,255,0.20) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+
+  border: 2px solid var(--brand);
+  border-bottom: none; /* merge with filter-buttons */
+
+  box-shadow: 0 0 10px var(--muted), inset 0 0 16px rgba(0,255,247,0.15);
+}
+
+/* Neon cyberpunk control buttons */
+.dummy-buttons button {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px; /* square-ish, sharp */
+  border: 1px solid var(--brand);
+  background: rgba(0, 255, 247, 0.15);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover: extra glow */
+.dummy-buttons button:hover {
+  transform: scale(1.0);
+  background: var(--brand);
+  box-shadow: 0 0 12px var(--brand), 0 0 24px rgba(0,255,247,0.4);
+}
+
+/* Optional window title (cyberpunk style) */
+.dummy-buttons::after {
+  content: "DocuMorph";
+  margin-left: auto;
+  font-family: 'Orbitron', 'Share Tech Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand);
+  text-shadow: 0 0 8px var(--brand), 0 0 12px rgba(255,0,127,0.5);
+}
+
+
+/* Keep your existing dummy-buttons styles as-is, just add this */
+
+/* Each button gets a cyberpunk glyph */
+.dummy-buttons button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--card);
+  /* text-shadow: 0 0 6px var(--brand), 0 0 12px rgba(0,255,247,0.4); */
+  background-color: var(--brand);
+  line-height: 1;
+}
+
+/* Minimize icon: underscore style */
+.dummy-buttons button.minimize::before {
+  content: "▁"; /* low line glyph */
+}
+
+/* Fullscreen icon: square style */
+.dummy-buttons button.fullscreen::before {
+  content: "☐"; /* square block */
+  font-size: 8px;
+}
+
+/* Close icon: X style */
+.dummy-buttons button.close::before {
+  content: "✕";
 }
 
 
 /* Center buttons and match width with content above */
+/* Symmetrical cyberpunk-style buttons */
 .form .btn,
 .result-btn {
   display: block;
   width: 100%;
-  max-width: 400px; /* same width as process button */
-  padding: 12px;
+  max-width: 400px;
+  padding: 12px 20px;
   margin: 14px auto 0 auto;
-  background: var(--btn);
-  color: #00060e;
-  border-radius: 8px;
-  font-weight: 600;
   font-size: 16px;
+  font-weight: 600;
+  color: #00060e; /* contrast for yellow base */
+  background: var(--btn); /* yellow base */
+  border: 2px solid var(--brand);
   text-align: center;
-  text-decoration: none; /* make <a> look like a button */
+  text-decoration: none;
   cursor: url("/static/cursors/link.cur"), pointer;
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: all 0.25s ease-in-out;
+
+  /* Symmetrical angled panel */
+  clip-path: polygon(10% 0%, 90% 0%, 100% 15%, 100% 85%, 90% 100%, 10% 100%, 0% 85%, 0% 15%);
+
+  /* Neon glow */
+  box-shadow: 0 0 8px var(--btn), 0 0 14px var(--brand);
 }
 
 .form .btn:hover,
 .result-btn:hover {
-  background: var(--brand);
+  background: var(--brand); /* pink accent on hover */
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 0 12px var(--brand);
+  box-shadow: 0 0 16px var(--brand), 0 0 24px var(--btn);
 }
+
 
 
 
@@ -1110,10 +1424,26 @@ html, body {
   max-width: 100%;
 }
 
+
+/* Mobile: hide button group, show dropdown */
+@media (max-width: 768px) {
+  .filter-buttons {
+    display: none;
+  }
+  .filter-dropdown {
+    display: block;
+  }
+}
+
 /* Extra tweak for very small phones */
-@media (max-width: 360px) {
+@media (max-width: 480px) {
   #documorph-title.pdf-title {
     font-size: 2rem;
     letter-spacing: 2px; /* Slightly tighter so text fits */
+  }
+  .filter-btn {
+    flex: 1 1 100%;
+    font-size: 0.8rem;
+    padding: 10px;
   }
 }

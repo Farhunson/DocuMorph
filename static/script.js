@@ -89,25 +89,41 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
-  const filterBtns = document.querySelectorAll(".filter-btn");
-  const cards = document.querySelectorAll(".card");
 
-  filterBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      // Remove active class from all
-      filterBtns.forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
+const filterBtns = document.querySelectorAll(".filter-btn");
+const filterDropdown = document.querySelector(".filter-dropdown");
+const cards = document.querySelectorAll(".card");
 
-      const filter = btn.dataset.filter;
-      cards.forEach(card => {
-        if (filter === "all" || card.classList.contains(filter)) {
-          card.style.display = "block";
-        } else {
-          card.style.display = "none";
-        }
-      });
-    });
+// --- BUTTON FILTER LOGIC ---
+filterBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    // Remove active class from all
+    filterBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const filter = btn.dataset.filter;
+    applyFilter(filter);
   });
+});
+
+// --- DROPDOWN FILTER LOGIC ---
+if (filterDropdown) {
+  filterDropdown.addEventListener("change", () => {
+    const filter = filterDropdown.value;
+    applyFilter(filter);
+  });
+}
+
+// --- SHARED FILTER FUNCTION ---
+function applyFilter(filter) {
+  cards.forEach(card => {
+    if (filter === "all" || card.classList.contains(filter)) {
+      card.style.display = "block";
+    } else {
+      card.style.display = "none";
+    }
+  });
+}
 
 
 
